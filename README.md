@@ -2,20 +2,25 @@
 
 A lightweight local-first AI Agent Framework built with Python, Ollama, and Qwen.
 
-Mini Agent Core demonstrates the core building blocks of an autonomous AI Agent:
+Mini Agent Core demonstrates how modern autonomous AI agents are built from the ground up.
+
+Core capabilities include:
 
 - Local LLM Integration
-- Tool Registry
-- Tool Decorators
 - Structured Memory
 - Conversation History
-- Planner
-- Executor
+- Planning
+- Execution
 - Dynamic Tool Selection
 - Tool Chains
 - Agent Loop
+- Web Search
+- Search Quality Filtering
+- Debug Tracing
 
 The project runs entirely locally using Ollama and Qwen models.
+
+No OpenAI API required.
 
 ---
 
@@ -28,13 +33,19 @@ Powered by:
 - Ollama
 - Qwen3:8B
 
-No OpenAI API required.
+Example:
+
+```bash
+python main.py "你好"
+```
 
 ---
 
 ## Structured Memory
 
-Persistent JSON-based memory:
+Persistent JSON-based memory.
+
+Example:
 
 ```json
 {
@@ -44,11 +55,18 @@ Persistent JSON-based memory:
 }
 ```
 
-Examples:
+Save memory:
 
 ```bash
 python main.py "记住项目名：Mini Agent Core"
+python main.py "记住姓名：Wang"
+```
+
+Recall memory:
+
+```bash
 python main.py "我的项目叫什么"
+python main.py "我叫什么"
 ```
 
 ---
@@ -61,7 +79,7 @@ Short-term memory stored in:
 history.json
 ```
 
-Supports contextual follow-up questions.
+Supports contextual follow-up conversations.
 
 Example:
 
@@ -82,12 +100,13 @@ Example:
 python main.py "帮我制定一个14天学习AI Agent的计划"
 ```
 
-Output:
+Example output:
 
 ```text
 1. Learn AI Agent fundamentals
-2. Build projects
-3. Study memory systems
+2. Study memory systems
+3. Build simple agents
+4. Explore planning workflows
 ...
 ```
 
@@ -113,6 +132,7 @@ Current tools:
 
 - calculator
 - note_writer
+- web_search
 
 Example:
 
@@ -127,6 +147,54 @@ calculator
 ↓
 note_writer
 ```
+
+---
+
+## Web Search
+
+The agent can retrieve real-world information using web search.
+
+Current capabilities:
+
+- Query Rewriting
+- Search Result Filtering
+- Source Quality Scoring
+- Time Context Awareness
+- Search Result Summarization
+
+Examples:
+
+```bash
+python main.py "OpenAI最近有什么新闻"
+
+python main.py "今天英伟达股价是多少"
+
+python main.py "波士顿大学地址在哪里"
+
+python main.py "美国签证为什么check很久"
+```
+
+---
+
+## Search Quality
+
+Introduced in v1.6.
+
+Features:
+
+- Search Result Filtering
+- Trusted Source Scoring
+- Outdated Content Detection
+- Higher Quality Context for LLM Summaries
+
+Examples of preferred sources:
+
+- Reuters
+- BBC
+- AP News
+- Government Websites (.gov)
+- Universities (.edu)
+- Official Company Websites
 
 ---
 
@@ -151,13 +219,39 @@ Example Output:
 ```text
 Agent Loop Completed
 
+Status:
+success
+
 Steps:
 1
 
 Final Summary:
 123 × 456 = 56088
-Result saved successfully.
+
+Result saved to:
+notes/agent_output_1.md
 ```
+
+---
+
+## Debug Mode
+
+View the complete execution trace.
+
+Example:
+
+```bash
+python main.py --debug "OpenAI最近有什么新闻"
+```
+
+Shows:
+
+- Task Routing
+- Tool Selection
+- Query Rewriting
+- Search Results
+- Tool Execution
+- Final Output
 
 ---
 
@@ -178,19 +272,31 @@ Tool Selector
     ↓
 Tool Chain
     ↓
-Tool Registry
-    ↓
 Tools
+```
+
+Tool Workflow:
+
+```text
+User Query
+    ↓
+Query Rewriter
+    ↓
+Web Search
+    ↓
+Search Filter
+    ↓
+LLM Summary
 ```
 
 Memory System:
 
 ```text
-Memory.json
+memory.json
     ↓
 Long-Term Memory
 
-History.json
+history.json
     ↓
 Short-Term Memory
 ```
@@ -203,19 +309,29 @@ Short-Term Memory
 mini-agent-core/
 │
 ├── agent/
-│   ├── core.py
-│   ├── memory.py
-│   ├── history.py
-│   ├── planner.py
-│   ├── executor.py
-│   ├── loop.py
-│   ├── router.py
-│   ├── registry.py
-│   ├── tool_selector.py
-│   ├── toolchain.py
-│   └── tools.py
+│
+├── core.py
+├── planner.py
+├── executor.py
+├── loop.py
+├── memory.py
+├── history.py
+├── registry.py
+├── router.py
+├── tool_selector.py
+├── toolchain.py
+├── tools.py
+│
+├── query_rewriter.py
+├── search_filter.py
+├── time_context.py
+├── debug_trace.py
 │
 ├── notes/
+│
+├── memory.json
+├── history.json
+│
 ├── main.py
 ├── requirements.txt
 └── README.md
@@ -267,28 +383,109 @@ python main.py "你好"
 
 ---
 
+# Version History
+
+## v0.1
+
+- Agent Core
+
+## v0.2
+
+- Tool Registry
+
+## v0.3
+
+- Tool Decorator
+
+## v0.4
+
+- Structured Memory
+
+## v0.5
+
+- Memory Context Injection
+
+## v0.6
+
+- Conversation History
+
+## v0.7
+
+- Planner
+
+## v0.8
+
+- Executor
+
+## v0.9
+
+- Dynamic Tool Chain
+
+## v1.0
+
+- Agent Loop
+
+## v1.2
+
+- Web Search
+
+## v1.3
+
+- LLM Query Rewriter
+
+## v1.4
+
+- Debug Trace
+
+## v1.4.2
+
+- Save Result Awareness
+- Auto Output Files
+
+## v1.5
+
+- Single Summary Mode
+- Loop Result Fallback
+
+## v1.6
+
+- Search Quality
+- Search Result Filter
+- Source Quality Scoring
+- Outdated Content Filtering
+
+---
+
 # Roadmap
 
-## Completed
+## v1.6.1
 
-- v0.1 Agent Core
-- v0.2 Tool Registry
-- v0.3 Tool Decorator
-- v0.4 Structured Memory
-- v0.5 Memory Context Injection
-- v0.6 Conversation History
-- v0.7 Planner
-- v0.8 Executor
-- v0.9 Dynamic Tool Chain
-- v1.0 Agent Loop
+Search Intent Detection
 
-## Future
+- Determine when web search is required
+- Reduce hallucinations
+- Improve factual accuracy
+
+## v1.6.2
+
+Source Ranking
+
+- Trust score system
+- Official source prioritization
+
+## v1.6.3
+
+Confidence Scoring
+
+- Answer confidence estimation
+- Better uncertainty handling
+
+## v2.0
 
 - Multi-Agent Support
+- Reflection Loop
+- Re-Planning
 - MCP Integration
-- Web Search Tool
-- File Reader Tool
-- Agent Workspace
 - Long-Term Knowledge Base
 
 ---

@@ -4,6 +4,7 @@ from ddgs import DDGS
 
 from agent.registry import tool
 from agent.query_rewriter import QueryRewriter
+from agent.search_filter import SearchFilter
 
 
 @tool(
@@ -51,26 +52,43 @@ def web_search(query: str):
         rewriter = QueryRewriter()
         rewritten_query = rewriter.rewrite(query)
 
-        results = []
+        raw_results = []
 
         with DDGS() as ddgs:
             for r in ddgs.text(
                 rewritten_query,
-                max_results=8
+                max_results=10
             ):
-                results.append(
-                    f"Title: {r.get('title', '')}\n"
-                    f"Body: {r.get('body', '')}\n"
-                    f"URL: {r.get('href', '')}\n"
-                )
+                raw_results.append(r)
 
-        if not results:
-            return f"No search results found for: {rewritten_query}"
+        search_filter = SearchFilter()
+        filtered_results = search_filter.filter_results(
+            raw_results,
+            max_results=5
+        )
+
+        if not filtered_results:
+            return (
+                f"Original Query: {query}\n"
+                f"Rewritten Query: {rewritten_query}\n\n"
+                "No high-quality recent search results found."
+            )
+
+        formatted_results = []
+
+        for item in filtered_results:
+            formatted_results.append(
+                f"Title: {item.get('title', '')}\n"
+                f"Body: {item.get('body', '')}\n"
+                f"URL: {item.get('url', '')}\n"
+                f"Source Score: {item.get('score', 0)}\n"
+            )
 
         return (
             f"Original Query: {query}\n"
             f"Rewritten Query: {rewritten_query}\n\n"
-            + "\n".join(results)
+            f"Filtered Results:\n"
+            + "\n".join(formatted_results)
         )
 
     except Exception as e:
