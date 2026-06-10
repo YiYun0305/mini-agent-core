@@ -30,6 +30,11 @@ class ToolChain:
 
         for tool_name in tools:
 
+            agent.debug_trace.add(
+                "Executing tool",
+                tool_name
+            )
+
             tool_config = get_tool(tool_name)
 
             if tool_config is None:
@@ -44,6 +49,11 @@ class ToolChain:
 
                 expression = self.extract_math_expression(task)
 
+                agent.debug_trace.add(
+                    "Calculator expression extracted",
+                    expression
+                )
+
                 if not expression:
                     status = "failed"
                     error = "calculator failed: no valid math expression found"
@@ -51,6 +61,11 @@ class ToolChain:
                     break
 
                 result = tool_func(expression)
+
+                agent.debug_trace.add(
+                    "Calculator result",
+                    result
+                )
 
                 if result.startswith("Error"):
                     status = "failed"
@@ -67,6 +82,11 @@ class ToolChain:
             elif tool_name == "web_search":
 
                 result = tool_func(task)
+
+                agent.debug_trace.add(
+                    "Web search raw result",
+                    result[:1000]
+                )
 
                 if result.startswith("Error"):
                     status = "failed"
@@ -93,6 +113,11 @@ Do not use bold markers like **.
 
                 last_result = summary
 
+                agent.debug_trace.add(
+                    "Web search summary",
+                    summary[:1000]
+                )
+
                 results.append(
                     f"web_search -> completed\n\n{summary}"
                 )
@@ -113,6 +138,11 @@ Result:
                 result = tool_func(
                     "agent_note.md",
                     content
+                )
+
+                agent.debug_trace.add(
+                    "Note writer result",
+                    result
                 )
 
                 results.append(result)

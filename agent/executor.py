@@ -13,6 +13,11 @@ class Executor:
 
         selected_tools = self.tool_selector.select(task)
 
+        self.agent.debug_trace.add(
+            "Tools selected",
+            selected_tools
+        )
+
         if not selected_tools:
             return {
                 "status": "skipped",
@@ -25,6 +30,11 @@ class Executor:
             selected_tools,
             task,
             self.agent
+        )
+
+        self.agent.debug_trace.add(
+            "Tool chain result",
+            chain_result
         )
 
         return {
