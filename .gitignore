@@ -1,6 +1,7 @@
+memory.json
+memory.txt
+notes/
 .venv/
 __pycache__/
 .env
-memory.txt
-notes/
 .DS_Store
