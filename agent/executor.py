@@ -9,37 +9,29 @@ class Executor:
         self.tool_selector = ToolSelector()
         self.tool_chain = ToolChain()
 
-    def execute(self, task: str, plan: str) -> str:
+    def execute(self, task: str, plan: str) -> dict:
 
-        selected_tools = self.tool_selector.select(
-            task
-        )
+        selected_tools = self.tool_selector.select(task)
 
         if not selected_tools:
-            return f"""
-Executor Result:
+            return {
+                "status": "skipped",
+                "tools": [],
+                "result": "No executable tools selected.",
+                "plan": plan
+            }
 
-No executable tools selected.
-
-Plan:
-{plan}
-"""
-
-        result = self.tool_chain.run(
+        chain_result = self.tool_chain.run(
             selected_tools,
             task,
             self.agent
         )
 
-        return f"""
-Executor Result:
-
-Selected Tools:
-{selected_tools}
-
-Tool Chain Result:
-{result}
-
-Final Output:
-Task completed successfully.
-"""
+        return {
+            "status": chain_result["status"],
+            "tools": selected_tools,
+            "result": chain_result["results"],
+            "error": chain_result["error"],
+            "last_result": chain_result["last_result"],
+            "plan": plan
+        }

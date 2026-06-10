@@ -7,6 +7,7 @@ class AgentLoop:
     def run(self, task: str) -> str:
 
         observations = []
+        final_status = "failed"
 
         for step in range(1, self.max_steps + 1):
 
@@ -21,11 +22,16 @@ class AgentLoop:
                 {
                     "step": step,
                     "plan": plan,
-                    "result": execution_result
+                    "execution": execution_result
                 }
             )
 
-            if "Task completed successfully" in execution_result:
+            if execution_result["status"] == "success":
+                final_status = "success"
+                break
+
+            if execution_result["status"] == "failed":
+                final_status = "failed"
                 break
 
         final_summary = self.agent.ask_llm(
@@ -35,6 +41,9 @@ Summarize the final result for the user.
 Original task:
 {task}
 
+Final status:
+{final_status}
+
 Observations:
 {observations}
 """
@@ -42,6 +51,9 @@ Observations:
 
         return f"""
 Agent Loop Completed
+
+Status:
+{final_status}
 
 Steps:
 {len(observations)}
