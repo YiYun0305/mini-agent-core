@@ -186,36 +186,6 @@ Response
 
 ---
 
-## Roadmap
-
-### v0.1.0
-
-- [x] Local Qwen3 Integration
-- [x] Calculator Tool
-- [x] Note Writer Tool
-- [x] Persistent Memory
-- [x] CLI Interface
-
-### v0.2.0
-
-- [ ] Tool Registry
-- [ ] Tool Executor
-- [ ] Multi Tool Routing
-
-### v0.3.0
-
-- [ ] File Tool
-- [ ] Web Search Tool
-- [ ] Conversation Memory
-
-### v1.0.0
-
-- [ ] MCP Integration
-- [ ] Plugin Architecture
-- [ ] Multi-Agent Support
-
----
-
 ## Tech Stack
 
 - Python 3.12

@@ -2,7 +2,8 @@ from ollama import chat
 
 from agent.memory import Memory
 from agent.router import Router
-from agent.registry import TOOLS
+import agent.tools
+from agent.registry import get_tool
 
 
 class Agent:
@@ -52,13 +53,15 @@ Do not show internal reasoning.
         return response["message"]["content"]
 
     def execute_tool(self, tool_name: str, task: str) -> str:
-        tool = TOOLS.get(tool_name)
+        tool_config = get_tool(tool_name)
 
-        if tool is None:
+        if tool_config is None:
             return f"Tool not found: {tool_name}"
 
+        tool_func = tool_config["function"]
+
         if tool_name == "calculator":
-            result = tool(task)
+            result = tool_func(task)
 
             return f"""
 Agent Thinking:
@@ -73,7 +76,7 @@ Result:
 
         if tool_name == "note_writer":
             content = self.ask_llm(task)
-            result = tool("agent_note.md", content)
+            result = tool_func("agent_note.md", content)
 
             return f"""
 Agent Thinking:
