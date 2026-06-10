@@ -13,10 +13,12 @@ class ToolSelector:
             or "最新" in task
             or "新闻" in task
             or "实时" in task
+            or "最近" in task
             or "current" in task.lower()
             or "latest" in task.lower()
             or "today" in task.lower()
             or "news" in task.lower()
+            or "recent" in task.lower()
         ):
             tools.append(
                 "web_search"
@@ -37,7 +39,12 @@ class ToolSelector:
         # Note Writer
         if (
             "保存" in task
+            or "保存下来" in task
+            or "存下来" in task
+            or "记录下来" in task
+            or "写下来" in task
             or "save" in task.lower()
+            or "write" in task.lower()
         ):
             tools.append(
                 "note_writer"

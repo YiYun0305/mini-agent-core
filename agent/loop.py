@@ -34,39 +34,30 @@ class AgentLoop:
                 final_status = "failed"
                 break
 
-        saved_files = []
+        execution = observations[-1]["execution"]
 
-        for item in observations:
-            execution = item.get("execution", {})
-            saved_file = execution.get("saved_file")
+        final_summary = execution.get("last_result")
 
-            if saved_file:
-                saved_files.append(saved_file)
+        if not final_summary:
 
-        final_summary = self.agent.ask_llm(
-            f"""
-Summarize the final result for the user.
+            results = execution.get("result", [])
 
-Original task:
-{task}
+            if results:
+                final_summary = "\n".join(
+                    str(item)
+                    for item in results
+            )
+            else:
+                final_summary = "No result available."
 
-Final status:
-{final_status}
-
-Saved files:
-{saved_files}
-
-Observations:
-{observations}
-
-Rules:
-- If files were saved, mention the exact saved file path from Saved files.
-- Do not invent file paths.
-- Use plain text only.
-- Do not use Markdown formatting.
-- Do not use bold markers like **.
-"""
+        saved_file = execution.get(
+            "saved_file"
         )
+
+        if saved_file:
+            final_summary += (
+                f"\n\nResult saved to:\n{saved_file}"
+            )
 
         return f"""
 Agent Loop Completed

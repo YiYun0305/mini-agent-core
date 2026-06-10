@@ -3,7 +3,7 @@ from pathlib import Path
 from ddgs import DDGS
 
 from agent.registry import tool
-from agent.search_rewriter import SearchQueryRewriter
+from agent.query_rewriter import QueryRewriter
 
 
 @tool(
@@ -48,7 +48,7 @@ def note_writer(filename: str, content: str):
 )
 def web_search(query: str):
     try:
-        rewriter = SearchQueryRewriter()
+        rewriter = QueryRewriter()
         rewritten_query = rewriter.rewrite(query)
 
         results = []
