@@ -3,6 +3,8 @@ from ollama import chat
 from agent.memory import Memory
 from agent.history import History
 from agent.router import Router
+from agent.planner import Planner
+
 import agent.tools
 from agent.registry import get_tool
 
@@ -14,6 +16,7 @@ class Agent:
         self.memory = Memory()
         self.history = History()
         self.router = Router()
+        self.planner = Planner(model)
 
     def should_remember(self, task: str) -> bool:
         keywords = ["记住"]
@@ -28,6 +31,17 @@ class Agent:
         ]
 
         return any(keyword in task for keyword in keywords)
+
+    def should_plan(self, task: str) -> bool:
+
+        keywords = [
+            "计划",
+            "规划",
+            "方案",
+            "plan"
+        ]
+
+        return any(keyword in task.lower() for keyword in keywords)
 
     def parse_memory_save(self, task: str):
 
@@ -106,8 +120,15 @@ User memory:
 
         content = response["message"]["content"]
 
-        self.history.add("user", task)
-        self.history.add("assistant", content)
+        self.history.add(
+            "user",
+            task
+        )
+
+        self.history.add(
+            "assistant",
+            content
+        )
 
         return content
 
@@ -207,14 +228,28 @@ Result:
 {result}
 """
 
+        # Planner
+        if self.should_plan(task):
+
+            plan = self.planner.create_plan(
+                task
+            )
+
+            return f"""
+Agent Planning:
+
+{plan}
+"""
+
         # Tool Routing
         tool_name = self.router.route(task)
 
         if tool_name:
+
             return self.execute_tool(
                 tool_name,
                 task
             )
 
-        # Default LLM with Memory + Conversation History
+        # Default LLM
         return self.ask_llm(task)
