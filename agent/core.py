@@ -4,6 +4,7 @@ from agent.memory import Memory
 from agent.history import History
 from agent.router import Router
 from agent.planner import Planner
+from agent.executor import Executor
 
 import agent.tools
 from agent.registry import get_tool
@@ -17,6 +18,7 @@ class Agent:
         self.history = History()
         self.router = Router()
         self.planner = Planner(model)
+        self.executor = Executor(self)
 
     def should_remember(self, task: str) -> bool:
         keywords = ["记住"]
@@ -33,12 +35,19 @@ class Agent:
         return any(keyword in task for keyword in keywords)
 
     def should_plan(self, task: str) -> bool:
-
         keywords = [
             "计划",
             "规划",
             "方案",
             "plan"
+        ]
+
+        return any(keyword in task.lower() for keyword in keywords)
+
+    def should_execute_plan(self, task: str) -> bool:
+        keywords = [
+            "保存",
+            "save"
         ]
 
         return any(keyword in task.lower() for keyword in keywords)
@@ -120,15 +129,8 @@ User memory:
 
         content = response["message"]["content"]
 
-        self.history.add(
-            "user",
-            task
-        )
-
-        self.history.add(
-            "assistant",
-            content
-        )
+        self.history.add("user", task)
+        self.history.add("assistant", content)
 
         return content
 
@@ -228,12 +230,27 @@ Result:
 {result}
 """
 
-        # Planner
-        if self.should_plan(task):
+        # Planner + Executor
+        if self.should_plan(task) or self.should_execute_plan(task):
 
             plan = self.planner.create_plan(
                 task
             )
+
+            if self.should_execute_plan(task):
+
+                execution_result = self.executor.execute(
+                    task,
+                    plan
+                )
+
+                return f"""
+Agent Planning:
+
+{plan}
+
+{execution_result}
+"""
 
             return f"""
 Agent Planning:
@@ -245,7 +262,6 @@ Agent Planning:
         tool_name = self.router.route(task)
 
         if tool_name:
-
             return self.execute_tool(
                 tool_name,
                 task
