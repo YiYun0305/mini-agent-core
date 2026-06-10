@@ -26,11 +26,21 @@ def note_writer(filename: str, content: str):
     notes_dir = Path("notes")
     notes_dir.mkdir(exist_ok=True)
 
-    file_path = notes_dir / filename
+    base_name = "agent_output"
+    extension = ".md"
+    index = 1
+
+    while True:
+        file_path = notes_dir / f"{base_name}_{index}{extension}"
+
+        if not file_path.exists():
+            break
+
+        index += 1
+
     file_path.write_text(content, encoding="utf-8")
 
     return f"Note saved to {file_path}"
-
 
 @tool(
     name="web_search",

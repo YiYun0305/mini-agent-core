@@ -34,6 +34,15 @@ class AgentLoop:
                 final_status = "failed"
                 break
 
+        saved_files = []
+
+        for item in observations:
+            execution = item.get("execution", {})
+            saved_file = execution.get("saved_file")
+
+            if saved_file:
+                saved_files.append(saved_file)
+
         final_summary = self.agent.ask_llm(
             f"""
 Summarize the final result for the user.
@@ -44,8 +53,18 @@ Original task:
 Final status:
 {final_status}
 
+Saved files:
+{saved_files}
+
 Observations:
 {observations}
+
+Rules:
+- If files were saved, mention the exact saved file path from Saved files.
+- Do not invent file paths.
+- Use plain text only.
+- Do not use Markdown formatting.
+- Do not use bold markers like **.
 """
         )
 

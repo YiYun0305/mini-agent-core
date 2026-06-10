@@ -43,5 +43,6 @@ class Executor:
             "result": chain_result["results"],
             "error": chain_result["error"],
             "last_result": chain_result["last_result"],
+            "saved_file": chain_result.get("saved_file"),
             "plan": plan
         }

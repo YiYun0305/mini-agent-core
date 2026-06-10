@@ -1,6 +1,7 @@
 import re
 
 from agent.registry import get_tool
+from agent.time_context import TimeContext
 
 
 class ToolChain:
@@ -25,6 +26,7 @@ class ToolChain:
 
         results = []
         last_result = None
+        saved_file = None
         status = "success"
         error = None
 
@@ -94,9 +96,14 @@ class ToolChain:
                     results.append(error)
                     break
 
+                time_context = TimeContext()
+
                 summary = agent.ask_llm(
                     f"""
 Use the following web search results to answer the user's question.
+
+Time context:
+{time_context.as_prompt_context()}
 
 User question:
 {task}
@@ -108,6 +115,12 @@ Answer in Chinese.
 Use plain text only.
 Do not use Markdown formatting.
 Do not use bold markers like **.
+
+Freshness rules:
+- If the user asks for today, latest, recent, current, or 最近/最新/今天, prioritize results from the current date or current year.
+- Ignore older results unless they are clearly necessary as background context.
+- If search results only contain outdated information, say that recent information was not found.
+- Do not present old information as recent news.
 """
                 )
 
@@ -139,6 +152,7 @@ Result:
                     "agent_note.md",
                     content
                 )
+                saved_file = result.replace("Note saved to ", "")
 
                 agent.debug_trace.add(
                     "Note writer result",
@@ -151,5 +165,6 @@ Result:
             "status": status,
             "error": error,
             "results": results,
-            "last_result": last_result
+            "last_result": last_result,
+            "saved_file": saved_file
         }
