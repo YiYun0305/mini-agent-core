@@ -66,17 +66,22 @@ class Agent:
 
     def ask_llm(self, task: str) -> str:
 
+        memory_data = self.memory.load_all()
+
         response = chat(
             model=self.model,
             messages=[
                 {
                     "role": "system",
-                    "content": """
+                    "content": f"""
 You are Mini Agent Core.
 
 Answer clearly and briefly.
 
 Do not show internal reasoning.
+
+User memory:
+{memory_data}
 """
                 },
                 {
@@ -192,5 +197,5 @@ Result:
                 task
             )
 
-        # Default LLM
+        # Default LLM with Memory Context
         return self.ask_llm(task)
