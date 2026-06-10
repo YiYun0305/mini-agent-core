@@ -1,49 +1,45 @@
-from agent.registry import get_tool
+from agent.tool_selector import ToolSelector
+from agent.toolchain import ToolChain
 
 
 class Executor:
 
     def __init__(self, agent):
         self.agent = agent
+        self.tool_selector = ToolSelector()
+        self.tool_chain = ToolChain()
 
     def execute(self, task: str, plan: str) -> str:
 
-        if "保存" in task or "save" in task.lower():
+        selected_tools = self.tool_selector.select(
+            task
+        )
 
-            content = self.agent.ask_llm(
-                task.replace("保存", "")
-            )
-
-            tool_config = get_tool("note_writer")
-
-            if tool_config is None:
-                return "note_writer tool not found."
-
-            note_writer = tool_config["function"]
-
-            save_result = note_writer(
-                "agent_note.md",
-                content
-            )
-
+        if not selected_tools:
             return f"""
 Executor Result:
 
-Step 1:
-Content generated.
+No executable tools selected.
 
-Step 2:
-{save_result}
-
-Final Output:
-Task completed successfully.
+Plan:
+{plan}
 """
+
+        result = self.tool_chain.run(
+            selected_tools,
+            task,
+            self.agent
+        )
 
         return f"""
 Executor Result:
 
-No executable tool flow found.
+Selected Tools:
+{selected_tools}
 
-Plan:
-{plan}
+Tool Chain Result:
+{result}
+
+Final Output:
+Task completed successfully.
 """
