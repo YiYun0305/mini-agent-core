@@ -59,8 +59,42 @@ class ToolChain:
                     break
 
                 last_result = result
+
                 results.append(
                     f"calculator -> {expression} = {result}"
+                )
+
+            elif tool_name == "web_search":
+
+                result = tool_func(task)
+
+                if result.startswith("Error"):
+                    status = "failed"
+                    error = f"web_search failed: {result}"
+                    results.append(error)
+                    break
+
+                summary = agent.ask_llm(
+                    f"""
+Use the following web search results to answer the user's question.
+
+User question:
+{task}
+
+Search results:
+{result}
+
+Answer in Chinese.
+Use plain text only.
+Do not use Markdown formatting.
+Do not use bold markers like **.
+"""
+                )
+
+                last_result = summary
+
+                results.append(
+                    f"web_search -> completed\n\n{summary}"
                 )
 
             elif tool_name == "note_writer":

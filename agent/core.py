@@ -39,7 +39,18 @@ class Agent:
         return any(keyword in task.lower() for keyword in keywords)
 
     def should_execute_plan(self, task: str) -> bool:
-        keywords = ["保存", "save"]
+        keywords = [
+            "保存",
+            "save",
+            "今天",
+            "最新",
+            "新闻",
+            "实时",
+            "current",
+            "latest",
+            "today",
+            "news"
+        ]
         return any(keyword in task.lower() for keyword in keywords)
 
     def parse_memory_save(self, task: str):
@@ -84,6 +95,9 @@ You are Mini Agent Core.
 Answer clearly and briefly.
 
 Do not show internal reasoning.
+Do not use Markdown formatting.
+Do not use bold markers like **.
+Use plain text only.
 
 User memory:
 {memory_data}
