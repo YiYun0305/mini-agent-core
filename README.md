@@ -1,100 +1,231 @@
 # Mini Agent Core
 
-A lightweight AI Agent framework built from scratch using Python and Ollama.
+A lightweight local-first AI Agent Framework built with Python, Ollama, and Qwen.
 
-Mini Agent Core is a local-first AI Agent project that demonstrates the fundamental building blocks of modern AI agents, including local LLM integration, tool calling, memory, and task routing.
+Mini Agent Core demonstrates the core building blocks of an autonomous AI Agent:
 
----
+- Local LLM Integration
+- Tool Registry
+- Tool Decorators
+- Structured Memory
+- Conversation History
+- Planner
+- Executor
+- Dynamic Tool Selection
+- Tool Chains
+- Agent Loop
 
-## Features
-
-### Local LLM
-
-Run Qwen3 completely locally using Ollama.
-
-### Calculator Tool
-
-Automatically detects and executes mathematical expressions.
-
-Example:
-
-```bash
-python main.py "123 * 456"
-```
-
-Output:
-
-```text
-56088
-```
+The project runs entirely locally using Ollama and Qwen models.
 
 ---
 
-### Note Writer Tool
+# Features
 
-Generate content and save it to a local file.
+## Local LLM
 
-Example:
+Powered by:
 
-```bash
-python main.py "写一份3天AI Agent学习计划并保存"
-```
+- Ollama
+- Qwen3:8B
 
-Generated file:
-
-```text
-notes/agent_note.md
-```
+No OpenAI API required.
 
 ---
 
-### Persistent Memory
+## Structured Memory
 
-Store and recall information across sessions.
+Persistent JSON-based memory:
 
-Save memory:
-
-```bash
-python main.py "记住：我的项目叫 Mini Agent Core"
+```json
+{
+  "project": "Mini Agent Core",
+  "name": "Wang",
+  "city": "Boston"
+}
 ```
 
-Recall memory:
+Examples:
 
 ```bash
+python main.py "记住项目名：Mini Agent Core"
 python main.py "我的项目叫什么"
 ```
 
-Output:
+---
+
+## Conversation History
+
+Short-term memory stored in:
 
 ```text
-记住：我的项目叫 Mini Agent Core
+history.json
+```
+
+Supports contextual follow-up questions.
+
+Example:
+
+```bash
+python main.py "我叫王"
+python main.py "我刚才说我叫什么"
 ```
 
 ---
 
-## Project Structure
+## Planner
+
+The planner analyzes a task before execution.
+
+Example:
+
+```bash
+python main.py "帮我制定一个14天学习AI Agent的计划"
+```
+
+Output:
+
+```text
+1. Learn AI Agent fundamentals
+2. Build projects
+3. Study memory systems
+...
+```
+
+---
+
+## Executor
+
+Executes planned actions automatically.
+
+Example:
+
+```bash
+python main.py "帮我写一份AI Agent学习计划并保存"
+```
+
+---
+
+## Dynamic Tool Selection
+
+The agent automatically selects tools based on task intent.
+
+Current tools:
+
+- calculator
+- note_writer
+
+Example:
+
+```bash
+python main.py "帮我计算 123 * 456 并保存结果"
+```
+
+Tool Chain:
+
+```text
+calculator
+↓
+note_writer
+```
+
+---
+
+## Agent Loop
+
+The core autonomous workflow:
+
+```text
+Goal
+ ↓
+Plan
+ ↓
+Execute
+ ↓
+Observe
+ ↓
+Summarize
+```
+
+Example Output:
+
+```text
+Agent Loop Completed
+
+Steps:
+1
+
+Final Summary:
+123 × 456 = 56088
+Result saved successfully.
+```
+
+---
+
+# Architecture
+
+```text
+User Input
+    ↓
+Agent Core
+    ↓
+Agent Loop
+    ↓
+Planner
+    ↓
+Executor
+    ↓
+Tool Selector
+    ↓
+Tool Chain
+    ↓
+Tool Registry
+    ↓
+Tools
+```
+
+Memory System:
+
+```text
+Memory.json
+    ↓
+Long-Term Memory
+
+History.json
+    ↓
+Short-Term Memory
+```
+
+---
+
+# Project Structure
 
 ```text
 mini-agent-core/
+│
 ├── agent/
-│   ├── __init__.py
 │   ├── core.py
 │   ├── memory.py
-│   ├── prompts.py
+│   ├── history.py
+│   ├── planner.py
+│   ├── executor.py
+│   ├── loop.py
+│   ├── router.py
+│   ├── registry.py
+│   ├── tool_selector.py
+│   ├── toolchain.py
 │   └── tools.py
 │
+├── notes/
 ├── main.py
 ├── requirements.txt
-├── .env.example
-├── .gitignore
 └── README.md
 ```
 
 ---
 
-## Installation
+# Installation
 
-### 1. Clone Repository
+Clone repository:
 
 ```bash
 git clone https://github.com/YiYun0305/mini-agent-core.git
@@ -102,7 +233,7 @@ git clone https://github.com/YiYun0305/mini-agent-core.git
 cd mini-agent-core
 ```
 
-### 2. Create Virtual Environment
+Create virtual environment:
 
 ```bash
 python3.12 -m venv .venv
@@ -110,92 +241,58 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install Dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Install Ollama
+Install Ollama:
 
-Download and install Ollama:
+```bash
+brew install --cask ollama
+```
 
-https://ollama.com/download
-
-### 5. Download Qwen3 Model
+Pull model:
 
 ```bash
 ollama pull qwen3:8b
 ```
 
-### 6. Verify Ollama
+Run:
 
 ```bash
-ollama run qwen3:8b
-```
-
-If the model responds correctly, Ollama is ready.
-
----
-
-## Usage
-
-### Ask the Agent
-
-```bash
-python main.py "介绍一下AI Agent"
-```
-
-### Calculator
-
-```bash
-python main.py "123 * 456"
-```
-
-### Save Note
-
-```bash
-python main.py "写一份AI Agent学习计划并保存"
-```
-
-### Memory
-
-```bash
-python main.py "记住：我的项目叫 Mini Agent Core"
-
-python main.py "我的项目叫什么"
+python main.py "你好"
 ```
 
 ---
 
-## Current Architecture
+# Roadmap
 
-```text
-User Input
-      │
-      ▼
-Task Router
-      │
- ┌────┼────┐
- ▼    ▼    ▼
-LLM  Tool Memory
-      │
-      ▼
-Response
-```
+## Completed
 
----
+- v0.1 Agent Core
+- v0.2 Tool Registry
+- v0.3 Tool Decorator
+- v0.4 Structured Memory
+- v0.5 Memory Context Injection
+- v0.6 Conversation History
+- v0.7 Planner
+- v0.8 Executor
+- v0.9 Dynamic Tool Chain
+- v1.0 Agent Loop
 
-## Tech Stack
+## Future
 
-- Python 3.12
-- Ollama
-- Qwen3 8B
-- Typer
-- Rich
+- Multi-Agent Support
+- MCP Integration
+- Web Search Tool
+- File Reader Tool
+- Agent Workspace
+- Long-Term Knowledge Base
 
 ---
 
-## License
+# License
 
 MIT License
