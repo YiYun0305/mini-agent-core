@@ -1,6 +1,8 @@
 from ollama import chat
-from agent.tools import calculator, note_writer
+
 from agent.memory import Memory
+from agent.router import Router
+from agent.registry import TOOLS
 
 
 class Agent:
@@ -8,25 +10,11 @@ class Agent:
     def __init__(self, model="qwen3:8b"):
         self.model = model
         self.memory = Memory()
-
-    def is_math_expression(self, task: str) -> bool:
-        math_chars = set("0123456789+-*/(). ")
-        return all(char in math_chars for char in task)
-
-    def should_save_note(self, task: str) -> bool:
-        keywords = ["保存", "写入", "记录", "save", "note"]
-        return any(keyword in task.lower() for keyword in keywords)
+        self.router = Router()
 
     def should_remember(self, task: str) -> bool:
-        keywords = [
-            "记住",
-            "remember"
-        ]
-
-        return any(
-            keyword in task.lower()
-            for keyword in keywords
-        )
+        keywords = ["记住", "remember"]
+        return any(keyword in task.lower() for keyword in keywords)
 
     def should_recall(self, task: str) -> bool:
         keywords = [
@@ -35,14 +23,9 @@ class Agent:
             "memory",
             "remembered"
         ]
-
-        return any(
-            keyword in task.lower()
-            for keyword in keywords
-        )
+        return any(keyword in task.lower() for keyword in keywords)
 
     def ask_llm(self, task: str) -> str:
-
         response = chat(
             model=self.model,
             messages=[
@@ -68,11 +51,49 @@ Do not show internal reasoning.
 
         return response["message"]["content"]
 
+    def execute_tool(self, tool_name: str, task: str) -> str:
+        tool = TOOLS.get(tool_name)
+
+        if tool is None:
+            return f"Tool not found: {tool_name}"
+
+        if tool_name == "calculator":
+            result = tool(task)
+
+            return f"""
+Agent Thinking:
+Tool selected by router
+
+Tool Selected:
+calculator
+
+Result:
+{result}
+"""
+
+        if tool_name == "note_writer":
+            content = self.ask_llm(task)
+            result = tool("agent_note.md", content)
+
+            return f"""
+Agent Thinking:
+Tool selected by router
+
+Tool Selected:
+note_writer
+
+{result}
+
+Content:
+{content}
+"""
+
+        return f"Unsupported tool: {tool_name}"
+
     def run(self, task: str) -> str:
 
         # Memory Save
         if self.should_remember(task):
-
             self.memory.save(task)
 
             return """
@@ -85,7 +106,6 @@ Memory saved successfully.
 
         # Memory Recall
         if self.should_recall(task):
-
             memory_content = self.memory.load()
 
             return f"""
@@ -96,44 +116,11 @@ Memory:
 {memory_content}
 """
 
-        # Calculator Tool
-        if self.is_math_expression(task):
+        # Tool Routing
+        tool_name = self.router.route(task)
 
-            result = calculator(task)
-
-            return f"""
-Agent Thinking:
-Detected math expression
-
-Tool Selected:
-calculator
-
-Result:
-{result}
-"""
-
-        # Note Writer Tool
-        if self.should_save_note(task):
-
-            content = self.ask_llm(task)
-
-            save_result = note_writer(
-                "agent_note.md",
-                content
-            )
-
-            return f"""
-Agent Thinking:
-Detected note saving task
-
-Tool Selected:
-note_writer
-
-{save_result}
-
-Content:
-{content}
-"""
+        if tool_name:
+            return self.execute_tool(tool_name, task)
 
         # Default LLM
         return self.ask_llm(task)
