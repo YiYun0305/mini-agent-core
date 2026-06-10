@@ -84,7 +84,14 @@ class Agent:
             return self.memory.load_all()
 
         return None
-
+    
+    def clean_output(self, text: str) -> str:
+        return (
+            text
+            .replace("**", "")
+            .replace("__", "")
+        )
+        
     def ask_llm(self, task: str) -> str:
         memory_data = self.memory.load_all()
         history_messages = self.history.load()
@@ -133,7 +140,9 @@ User memory:
             options={"temperature": 0.3}
         )
 
-        content = response["message"]["content"]
+        content = self.clean_output(
+            response["message"]["content"]
+        )
 
         self.history.add("user", task)
         self.history.add("assistant", content)
