@@ -1,7 +1,18 @@
-memory.json
-memory.txt
-notes/
+# Python
 .venv/
 __pycache__/
+*.pyc
+
+# Environment
 .env
+
+# Agent Memory
+memory.json
+memory.txt
+history.json
+
+# Generated Notes
+notes/
+
+# macOS
 .DS_Store

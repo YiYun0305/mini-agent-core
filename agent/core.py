@@ -1,6 +1,7 @@
 from ollama import chat
 
 from agent.memory import Memory
+from agent.history import History
 from agent.router import Router
 import agent.tools
 from agent.registry import get_tool
@@ -11,6 +12,7 @@ class Agent:
     def __init__(self, model="qwen3:8b"):
         self.model = model
         self.memory = Memory()
+        self.history = History()
         self.router = Router()
 
     def should_remember(self, task: str) -> bool:
@@ -67,13 +69,12 @@ class Agent:
     def ask_llm(self, task: str) -> str:
 
         memory_data = self.memory.load_all()
+        history_messages = self.history.load()
 
-        response = chat(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"""
+        messages = [
+            {
+                "role": "system",
+                "content": f"""
 You are Mini Agent Core.
 
 Answer clearly and briefly.
@@ -83,18 +84,32 @@ Do not show internal reasoning.
 User memory:
 {memory_data}
 """
-                },
-                {
-                    "role": "user",
-                    "content": task
-                }
-            ],
+            }
+        ]
+
+        messages.extend(history_messages)
+
+        messages.append(
+            {
+                "role": "user",
+                "content": task
+            }
+        )
+
+        response = chat(
+            model=self.model,
+            messages=messages,
             options={
                 "temperature": 0.3
             }
         )
 
-        return response["message"]["content"]
+        content = response["message"]["content"]
+
+        self.history.add("user", task)
+        self.history.add("assistant", content)
+
+        return content
 
     def execute_tool(self, tool_name: str, task: str) -> str:
 
@@ -145,6 +160,10 @@ Content:
         return f"Unsupported tool: {tool_name}"
 
     def run(self, task: str) -> str:
+
+        # Conversation History Recall
+        if "刚才" in task:
+            return self.ask_llm(task)
 
         # Structured Memory Save
         if self.should_remember(task):
@@ -197,5 +216,5 @@ Result:
                 task
             )
 
-        # Default LLM with Memory Context
+        # Default LLM with Memory + Conversation History
         return self.ask_llm(task)
